@@ -1,0 +1,150 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* ===== VARIÁVEIS DE TEMA — injetadas via ThemeContext.tsx no :root ===== */
+:root {
+  /* Accent (definida pelo JS, derivadas calculadas pelo CSS) */
+  --accent-color: #4a90d9;
+  --accent-hover: color-mix(in srgb, var(--accent-color) 82%, #000);
+  --accent-dark: color-mix(in srgb, var(--accent-color) 68%, #000);
+  --accent-light: color-mix(in srgb, var(--accent-color) 12%, #fff);
+  --accent-border: color-mix(in srgb, var(--accent-color) 30%, #fff);
+  --accent-shadow: color-mix(in srgb, var(--accent-color) 25%, transparent);
+
+  /* Background / surface (definidas pelo JS por modo) */
+  --bg-primary: #eef2f7;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f8fafc;
+
+  /* Texto */
+  --text-primary: #1e2d40;
+  --text-secondary: #4a6075;
+  --text-muted: #8fa5b8;
+
+  /* Bordas */
+  --border-color: #dde3ee;
+  --border-soft: #eaeff7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ===== DARK MODE — sobrescreve classes Tailwind hardcoded ===== */
+[data-mode="dark"] .bg-white {
+  background-color: var(--bg-surface) !important;
+}
+
+[data-mode="dark"] .bg-\[#f8fafc\] {
+  background-color: var(--bg-elevated) !important;
+}
+
+[data-mode="dark"] .bg-\[#fafbfd\] {
+  background-color: var(--bg-surface) !important;
+}
+
+[data-mode="dark"] .bg-\[#f0f5ff\] {
+  background-color: color-mix(in srgb, var(--accent-color) 10%, var(--bg-elevated)) !important;
+}
+
+[data-mode="dark"] .bg-\[#f8faff\] {
+  background-color: var(--bg-elevated) !important;
+}
+
+[data-mode="dark"] .border-\[#dde3ee\] {
+  border-color: var(--border-color) !important;
+}
+
+[data-mode="dark"] .border-\[#eaeff7\] {
+  border-color: var(--border-soft) !important;
+}
+
+[data-mode="dark"] .text-\[#1e2d40\] {
+  color: var(--text-primary) !important;
+}
+
+[data-mode="dark"] .text-\[#0f1f30\] {
+  color: var(--text-primary) !important;
+}
+
+[data-mode="dark"] .text-\[#4a6075\] {
+  color: var(--text-secondary) !important;
+}
+
+[data-mode="dark"] .text-\[#8fa5b8\] {
+  color: var(--text-muted) !important;
+}
+
+[data-mode="dark"] .divide-\[#eaeff7\]\/50>*+* {
+  border-color: var(--border-soft) !important;
+}
+
+[data-mode="dark"] .divide-\[#eaeff7\]>*+* {
+  border-color: var(--border-soft) !important;
+}
+
+/* ===== SEPIA MODE ===== */
+[data-mode="sepia"] .bg-white {
+  background-color: var(--bg-surface) !important;
+}
+
+[data-mode="sepia"] .bg-\[#f8fafc\] {
+  background-color: var(--bg-elevated) !important;
+}
+
+[data-mode="sepia"] .border-\[#dde3ee\] {
+  border-color: var(--border-color) !important;
+}
+
+[data-mode="sepia"] .text-\[#1e2d40\] {
+  color: var(--text-primary) !important;
+}
+
+[data-mode="sepia"] .text-\[#0f1f30\] {
+  color: var(--text-primary) !important;
+}
+
+[data-mode="sepia"] .text-\[#4a6075\] {
+  color: var(--text-secondary) !important;
+}
+
+[data-mode="sepia"] .text-\[#8fa5b8\] {
+  color: var(--text-muted) !important;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color);
+}
+
+/* ===== TRANSIÇÕES GLOBAIS ===== */
+* {
+  transition-property: color, background-color, border-color, opacity, transform, box-shadow;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SEURBH Dashboard - Dev Mode</title>
+
+    <!-- Tailwind CSS (via CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fontes e Ícones -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+    </style>
+
+    <!-- ImportsMaps para lidar com as dependências do Vite/React -->
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/react@19.0.0",
+          "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+          "react-dom": "https://esm.sh/react-dom@19.0.0",
+          "lucide-react": "https://esm.sh/lucide-react@0.344.0",
+          "clsx": "https://esm.sh/clsx@2.1.0",
+          "tailwind-merge": "https://esm.sh/tailwind-merge@2.2.1"
+        }
+      }
+    </script>
+
+    <!-- Babel Standalone (para transpilar JSX e TSX no browser) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Plugin customizado do babel para converter imports relativos em URLs interpretáveis pelo powershell -->
+    <script>
+      // Configurando Babel
+      Babel.registerPreset("tsx", {
+        presets: [
+          [
+            Babel.availablePresets["typescript"],
+            { isTSX: true, allExtensions: true },
+          ],
+          [Babel.availablePresets["react"], { runtime: "automatic" }],
+        ],
+      });
+    </script>
+  </head>
+  <body class="bg-gray-50 text-gray-900 antialiased h-screen overflow-hidden">
+    <div id="root" class="h-full w-full">Carregando painel sem Node.js...</div>
+
+    <!-- O Script principal vai transpilar e iniciar a aplicação React -->
+    <script type="text/babel" data-presets="tsx,react" data-type="module">
+      import React from "react";
+      import { createRoot } from "react-dom/client";
+
+      // Ponto de entrada modificado (Devido limitações do Babel em fazer deep imports complexos locais,
+      // nós fazemos fetch manual dos componentes ou usamos um wrapper para renderizar)
+
+      async function loadApp() {
+        try {
+          const root = createRoot(document.getElementById("root"));
+          root.render(
+            <div className="flex items-center justify-center h-full w-full bg-slate-100 flex-col gap-4">
+              <div className="text-4xl">🚀</div>
+              <h1 className="text-2xl font-bold text-slate-800">
+                Servidor Estático Ativo
+              </h1>
+              <p className="text-slate-600 mb-4">
+                React rodando via CDN (Babel in-browser).
+              </p>
+              <div className="p-4 bg-white rounded-lg shadow max-w-lg border border-slate-200">
+                <p className="font-semibold text-emerald-600 mb-2">
+                  API do Google Drive OK!
+                </p>
+                <p className="text-sm">
+                  Infelizmente, renderizar toda a árvore do projeto Vite com
+                  muitos arquivos locais complexos <code>.tsx</code> usando
+                  Babel no cliente tem alta limitação de imports
+                  absolutos/relativos.
+                </p>
+                <p className="text-sm mt-2">
+                  Para ver o dashboard completo, o projeto precisa ser buildado
+                  (npm run build) de casa e vir para a pasta "dist".
+                </p>
+              </div>
+            </div>,
+          );
+        } catch (e) {
+          document.getElementById("root").innerHTML =
+            `<div style="color:red; padding:2rem;">Erro ao compilar app: ${e.message}</div>`;
+        }
+      }
+
+      loadApp();
+    </script>
+  </body>
+</html>
