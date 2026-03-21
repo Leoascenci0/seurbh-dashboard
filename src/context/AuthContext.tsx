@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Promise para forçar o destravamento caso o getSession do SDK congele silenciosamente
         const timeoutPromise = new Promise<{ data: any, error: any }>((_, reject) =>
-            setTimeout(() => reject(new Error("Timeout no getSession do Supabase")), 2500)
+            setTimeout(() => reject(new Error("Timeout no getSession do Supabase")), 8000)
         );
 
         // Checa sessão inicial com Race
@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         try {
             const timeoutPromise = new Promise<{ data: any, error: any }>((_, reject) =>
-                setTimeout(() => reject(new Error("Timeout: O servidor de autenticação demorou muito para responder.")), 8000)
+                setTimeout(() => reject(new Error("Timeout: O servidor de autenticação demorou muito para responder na primeira conexão. Tente novamente.")), 25000)
             );
 
             const { error } = await Promise.race([

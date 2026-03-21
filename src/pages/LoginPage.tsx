@@ -35,7 +35,7 @@ export function LoginPage() {
             // Register Mode
             try {
                 const timeoutPromise = new Promise<{ data: any, error: any }>((_, reject) =>
-                    setTimeout(() => reject(new Error("A conexão expirou. Verifique sua internet ou tente novamente.")), 10000)
+                    setTimeout(() => reject(new Error("A conexão expirou. O servidor está inicializando, tente novamente.")), 25000)
                 );
 
                 const { data, error: signUpError } = await Promise.race([
