@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X, FileDigit, User, MapPin, Tag, AlertTriangle, ChevronDown } from 'lucide-react';
 import { UploadZone } from './UploadZone';
 import type { ProcessCategory, ProcessStatus } from '../types';
-import { saveProcesso } from '../data/sheetsApi';
+import { saveProcesso, createDriveFolder } from '../data/sheetsApi';
 import { useProcessos } from '../context/ProcessosContext';
 import { useConfig } from '../context/ConfigContext';
 
@@ -46,9 +46,10 @@ const glebas = [
 ];
 
 export function NewProcessModal({ onClose, onSuccess }: NewProcessModalProps) {
-    const { getActiveSheetsUrl, driveRootFolderId } = useConfig();
+    const { getActiveSheetsUrl, getTargetSheetUrl, driveRootFolderId } = useConfig();
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
+    const [feedbackMessage, setFeedbackMessage] = useState<string>('');
     const [validationError, setValidationError] = useState<string | null>(null);
     const [form, setForm] = useState({
         seiNumber: '',
@@ -79,6 +80,22 @@ export function NewProcessModal({ onClose, onSuccess }: NewProcessModalProps) {
 
         setIsLoading(true);
         try {
+            // Se houver ID raiz do drive, criar a subpasta automaticamente
+            let newDriveLink = '';
+            if (driveRootFolderId && getActiveSheetsUrl()) {
+                setFeedbackMessage('Criando pasta no Google Drive...');
+                try {
+                    const reqFolderName = form.requerente.split(' ')[0] || form.requerente;
+                    const folderName = `${form.seiNumber} - ${reqFolderName}`;
+                    const driveRes = await createDriveFolder(folderName, driveRootFolderId, getActiveSheetsUrl());
+                    newDriveLink = driveRes.folderUrl;
+                } catch (e) {
+                    console.error("Falha ao criar pasta, prosseguindo sem ela", e);
+                }
+            }
+
+            setFeedbackMessage('Salvando Processo...');
+
             const success = await saveProcesso({
                 CADASTRO: form.cadastro,
                 LOTE: form.lote,
@@ -91,8 +108,9 @@ export function NewProcessModal({ onClose, onSuccess }: NewProcessModalProps) {
                 SITUAÇÃO: form.status,
                 'ANALISTA / DESENHISTA': form.responsavel,
                 OBSERVAÇÃO: form.endereco,
+                'Link do Drive': newDriveLink, // Nova propriedade!
                 'DRIVE_ROOT_ID': driveRootFolderId || ''
-            }, getActiveSheetsUrl());
+            }, getActiveSheetsUrl(), getTargetSheetUrl());
 
             if (success) {
                 await refreshProcessos();
@@ -247,7 +265,7 @@ export function NewProcessModal({ onClose, onSuccess }: NewProcessModalProps) {
                         disabled={isLoading}
                         className="px-6 py-2 rounded-lg text-sm font-semibold bg-[#4a90d9] text-white disabled:opacity-50 flex items-center gap-2"
                     >
-                        {isLoading ? 'Salvando...' : step === 3 ? 'Finalizar' : 'Próximo'}
+                        {isLoading ? (feedbackMessage || 'Salvando...') : step === 3 ? 'Finalizar' : 'Próximo'}
                     </button>
                 </div>
             </div>

@@ -20,14 +20,14 @@ interface ProcessosContextData {
 const ProcessosContext = createContext<ProcessosContextData>({} as ProcessosContextData);
 
 export function ProcessosProvider({ children }: { children: ReactNode }) {
-    const { getActiveSheetsUrl } = useConfig();
+    const { getActiveSheetsUrl, getTargetSheetUrl } = useConfig();
     const [processes, setProcesses] = useState<SeiProcess[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const loadProcessos = async () => {
         setIsLoading(true);
         try {
-            const data = await fetchProcessos(getActiveSheetsUrl());
+            const data = await fetchProcessos(getActiveSheetsUrl(), getTargetSheetUrl());
             if (data && data.length > 0) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const mapped: SeiProcess[] = data.map((row: any, i: number) => ({

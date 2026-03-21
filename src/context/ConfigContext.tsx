@@ -5,16 +5,21 @@ interface ConfigContextData {
     driveRootFolderId: string | null;
     normativasFolderId: string | null;
     sheetsApiUrl: string | null;
+    targetSheetUrl: string | null;
     isDriveLinked: boolean;
     isNormativasLinked: boolean;
     isSheetsLinked: boolean;
+    isTargetSheetLinked: boolean;
     updateDriveId: (urlOrId: string) => { success: boolean; id?: string; error?: string };
     updateNormativasId: (urlOrId: string) => { success: boolean; id?: string; error?: string };
     updateSheetsUrl: (url: string) => { success: boolean; url?: string; error?: string };
+    updateTargetSheetUrl: (url: string) => { success: boolean; url?: string; error?: string };
     clearDriveConfig: () => void;
     clearNormativasConfig: () => void;
     clearSheetsConfig: () => void;
+    clearTargetSheetConfig: () => void;
     getActiveSheetsUrl: () => string;
+    getTargetSheetUrl: () => string;
 }
 
 const ConfigContext = createContext<ConfigContextData>({} as ConfigContextData);
@@ -34,12 +39,21 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
         return localStorage.getItem('seurbh_sheets_api_url');
     });
 
+    const [targetSheetUrl, setTargetSheetUrl] = useState<string | null>(() => {
+        return localStorage.getItem('seurbh_target_sheet_url');
+    });
+
     const isDriveLinked = !!driveRootFolderId;
     const isNormativasLinked = !!normativasFolderId;
     const isSheetsLinked = !!sheetsApiUrl;
+    const isTargetSheetLinked = !!targetSheetUrl;
 
     const getActiveSheetsUrl = () => {
         return sheetsApiUrl || import.meta.env.VITE_GOOGLE_SHEETS_API_URL || "";
+    };
+
+    const getTargetSheetUrl = () => {
+        return targetSheetUrl || "";
     };
 
     const updateDriveId = (urlOrId: string) => {
@@ -99,6 +113,15 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
         return { success: true, url: trimmedUrl };
     };
 
+    const updateTargetSheetUrl = (url: string) => {
+        const trimmedUrl = url.trim();
+        if (!trimmedUrl) return { success: false, error: 'A URL ou ID da planilha não pode estar vazia.' };
+
+        localStorage.setItem('seurbh_target_sheet_url', trimmedUrl);
+        setTargetSheetUrl(trimmedUrl);
+        return { success: true, url: trimmedUrl };
+    };
+
     const clearDriveConfig = () => {
         localStorage.removeItem('seurbh_drive_root_id');
         setDriveRootFolderId(null);
@@ -114,21 +137,31 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
         setSheetsApiUrl(null);
     };
 
+    const clearTargetSheetConfig = () => {
+        localStorage.removeItem('seurbh_target_sheet_url');
+        setTargetSheetUrl(null);
+    };
+
     return (
         <ConfigContext.Provider value={{
             driveRootFolderId,
             normativasFolderId,
             sheetsApiUrl,
+            targetSheetUrl,
             isDriveLinked,
             isNormativasLinked,
             isSheetsLinked,
+            isTargetSheetLinked,
             updateDriveId,
             updateNormativasId,
             updateSheetsUrl,
+            updateTargetSheetUrl,
             clearDriveConfig,
             clearNormativasConfig,
             clearSheetsConfig,
-            getActiveSheetsUrl
+            clearTargetSheetConfig,
+            getActiveSheetsUrl,
+            getTargetSheetUrl
         }}>
             {children}
         </ConfigContext.Provider>

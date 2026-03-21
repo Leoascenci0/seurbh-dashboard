@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Cloud, Link, CheckCircle, AlertCircle, Trash2, Code, Copy, Check, HelpCircle, Download } from 'lucide-react';
 import { useConfig } from '../context/ConfigContext';
 import { APPS_SCRIPT_CODE } from '../data/googleSheetsScript';
+import { initInfrastructure } from '../data/sheetsApi';
 import clsx from 'clsx';
 
 interface DriveConfigModalProps {
@@ -13,13 +14,16 @@ export function DriveConfigModal({ isOpen, onClose }: DriveConfigModalProps) {
     const {
         driveRootFolderId, isDriveLinked, updateDriveId, clearDriveConfig,
         normativasFolderId, isNormativasLinked, updateNormativasId, clearNormativasConfig,
-        sheetsApiUrl, isSheetsLinked, updateSheetsUrl, clearSheetsConfig
+        sheetsApiUrl, isSheetsLinked, updateSheetsUrl, clearSheetsConfig,
+        targetSheetUrl, isTargetSheetLinked, updateTargetSheetUrl, clearTargetSheetConfig, getTargetSheetUrl, getActiveSheetsUrl
     } = useConfig();
     const [driveInputValue, setDriveInputValue] = useState('');
     const [normativasInputValue, setNormativasInputValue] = useState('');
     const [sheetsInputValue, setSheetsInputValue] = useState('');
-    const [feedback, setFeedback] = useState<{ type: 'success' | 'error', message: string, target: 'drive' | 'normativas' | 'sheets' | 'copy' } | null>(null);
+    const [targetSheetInputValue, setTargetSheetInputValue] = useState('');
+    const [feedback, setFeedback] = useState<{ type: 'success' | 'error', message: string, target: 'drive' | 'normativas' | 'sheets' | 'targetSheet' | 'copy' | 'init' } | null>(null);
     const [isCopying, setIsCopying] = useState(false);
+    const [isInitializing, setIsInitializing] = useState(false);
 
     if (!isOpen) return null;
 
@@ -70,10 +74,51 @@ export function DriveConfigModal({ isOpen, onClose }: DriveConfigModalProps) {
         }
     };
 
+    const handleLinkTargetSheet = () => {
+        const result = updateTargetSheetUrl(targetSheetInputValue);
+        if (result.success) {
+            setFeedback({ type: 'success', message: 'Planilha alvo vinculada!', target: 'targetSheet' });
+            setTargetSheetInputValue('');
+            setTimeout(() => setFeedback(null), 3000);
+        } else {
+            setFeedback({ type: 'error', message: result.error || 'URL inválida.', target: 'targetSheet' });
+        }
+    };
+
     const handleUnlinkSheets = () => {
-        if (confirm('Deseja realmente desvincular esta planilha?')) {
+        if (confirm('Deseja realmente desvincular o Robô Integrador?')) {
             clearSheetsConfig();
             setFeedback(null);
+        }
+    };
+
+    const handleUnlinkTargetSheet = () => {
+        if (confirm('Deseja desvincular a planilha de dados?')) {
+            clearTargetSheetConfig();
+            setFeedback(null);
+        }
+    };
+
+    const handleInitInfra = async () => {
+        const robotUrl = getActiveSheetsUrl();
+        const sheetUrl = getTargetSheetUrl();
+
+        if (!robotUrl || !sheetUrl) {
+            setFeedback({ type: 'error', message: 'Vincule a URL do Robô e da Planilha Alvo primeiro.', target: 'init' });
+            return;
+        }
+
+        setIsInitializing(true);
+        setFeedback({ type: 'success', message: 'Enviando comandos para o robô. Aguarde...', target: 'init' });
+
+        try {
+            const resp = await initInfrastructure(sheetUrl, robotUrl);
+            setFeedback({ type: 'success', message: 'Sucesso! Planilha preparada com abas e colunas.', target: 'init' });
+            setTimeout(() => setFeedback(null), 6000);
+        } catch (e: any) {
+            setFeedback({ type: 'error', message: e.message || 'Erro ao comunicar com o Google.', target: 'init' });
+        } finally {
+            setIsInitializing(false);
         }
     };
 
@@ -161,7 +206,17 @@ export function DriveConfigModal({ isOpen, onClose }: DriveConfigModalProps) {
                                     <div className="space-y-1">
                                         <p className="text-xs font-bold text-amber-100 uppercase tracking-tighter">Vincule os Links</p>
                                         <p className="text-[11px] text-[#8fa5b8] leading-relaxed">
-                                            Role para baixo e cole o <b className="text-[#e1e1e1]">Link da Pasta do Drive</b> (Seção 1) e a <b className="text-[#e1e1e1]">URL do Web App</b> (Seção 2).
+                                            Role para baixo e cole o <b className="text-[#e1e1e1]">Link da Pasta do Drive</b>, a <b className="text-[#e1e1e1]">URL do Robô</b> e a <b className="text-[#e1e1e1]">URL da Planilha Alvo</b>. Pressione os botões para vincular.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <span className="w-5 h-5 rounded-full bg-[#4edb83]/20 text-[#4edb83] flex items-center justify-center text-[10px] font-bold flex-shrink-0">4</span>
+                                    <div className="space-y-1">
+                                        <p className="text-xs font-bold text-[#4edb83] uppercase tracking-tighter">Prepare a Infraestrutura</p>
+                                        <p className="text-[11px] text-[#8fa5b8] leading-relaxed">
+                                            Com tudo vinculado, aperte no botão mágico lá no final: <b className="text-[#e1e1e1]">"Preparar Infraestrutura da Planilha"</b>.
                                         </p>
                                     </div>
                                 </div>
@@ -290,6 +345,7 @@ export function DriveConfigModal({ isOpen, onClose }: DriveConfigModalProps) {
                                 <button
                                     onClick={handleUnlinkNormativas}
                                     className="p-1.5 hover:bg-[#eb5757]/10 text-[#eb5757] rounded-md transition-colors"
+                                    title="Desvincular"
                                 >
                                     <Trash2 size={14} />
                                 </button>
@@ -367,6 +423,96 @@ export function DriveConfigModal({ isOpen, onClose }: DriveConfigModalProps) {
                                 {feedback.message}
                             </div>
                         )}
+                    </div>
+
+                    <div className="border-t border-[#2a475e] pt-2" />
+
+                    {/* Seção Planilha Alvo e Preparação */}
+                    <div className="space-y-4">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-[#8fa5b8] tracking-widest uppercase">4. Planilha Alvo (Onde os dados ficam)</label>
+                            <p className="text-[10px] text-[#5e768d]">URL ou ID da planilha Google vazia (ou existente).</p>
+                        </div>
+
+                        <div className="space-y-3">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={targetSheetInputValue}
+                                    onChange={(e) => setTargetSheetInputValue(e.target.value)}
+                                    placeholder="https://docs.google.com/spreadsheets/d/..."
+                                    className="w-full bg-[#0d141b] border border-[#2a475e] rounded-lg px-4 py-2.5 text-sm text-[#e1e1e1] placeholder:text-[#384b5f] focus:outline-none focus:border-[#4a90d9] transition-all"
+                                />
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[#384b5f]">
+                                    <Link size={14} />
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleLinkTargetSheet}
+                                className="w-full py-2.5 bg-[#4a90d9] hover:bg-[#5da0e6] text-[#e1e1e1] font-bold rounded-lg shadow-lg shadow-[#4a90d9]/10 transition-all active:scale-[0.98] text-sm"
+                            >
+                                Vincular Planilha Alvo
+                            </button>
+                        </div>
+
+                        <div className={clsx(
+                            "p-3 rounded-lg border flex items-center justify-between transition-colors",
+                            isTargetSheetLinked
+                                ? "bg-[#18281d] border-[#2d4d38] text-[#4edb83]"
+                                : "bg-[#1f191a] border-[#4d2a2c] text-[#eb5757]"
+                        )}>
+                            <div className="flex items-center gap-2.5">
+                                {isTargetSheetLinked ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase tracking-wider">
+                                        {isTargetSheetLinked ? "Planilha Vinculada" : "Pl. Não Vinculada"}
+                                    </p>
+                                    {isTargetSheetLinked && targetSheetUrl && (
+                                        <p className="text-[9px] opacity-70 mt-0.5 truncate max-w-[150px]">
+                                            URL: {targetSheetUrl.substring(0, 25)}...
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                            {isTargetSheetLinked && (
+                                <button
+                                    onClick={handleUnlinkTargetSheet}
+                                    className="p-1.5 hover:bg-[#eb5757]/10 text-[#eb5757] rounded-md transition-colors"
+                                    title="Desvincular"
+                                >
+                                    <Trash2 size={14} />
+                                </button>
+                            )}
+                        </div>
+                        {feedback?.target === 'targetSheet' && (
+                            <div className={clsx("text-[10px] font-medium animate-in slide-in-from-top-1", feedback.type === 'success' ? "text-[#4edb83]" : "text-[#eb5757]")}>
+                                {feedback.message}
+                            </div>
+                        )}
+
+                        {/* THE MAGIC BUTTON */}
+                        <div className="mt-6">
+                            <button
+                                onClick={handleInitInfra}
+                                disabled={isInitializing}
+                                className={clsx(
+                                    "w-full py-3 flex items-center justify-center gap-2 font-bold rounded-lg transition-all active:scale-[0.98] text-sm text-white shadow-xl",
+                                    isInitializing ? "bg-[#384b5f] cursor-not-allowed opacity-70" : "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500"
+                                )}
+                            >
+                                {isInitializing ? (
+                                    <><Code className="animate-spin" size={18} /> Processando Comandos...</>
+                                ) : (
+                                    <><CheckCircle size={18} /> Preparar Infraestrutura da Planilha</>
+                                )}
+                            </button>
+                            {feedback?.target === 'init' && (
+                                <div className={clsx("text-xs font-bold mt-2 text-center animate-in slide-in-from-top-1", feedback.type === 'success' ? "text-[#4edb83]" : "text-[#eb5757]")}>
+                                    {feedback.message}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     <div className="border-t border-[#2a475e] pt-2" />

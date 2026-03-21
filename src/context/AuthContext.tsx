@@ -44,18 +44,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     useEffect(() => {
+        console.log("[AuthContext] isSupabaseReady:", isSupabaseReady);
         if (!isSupabaseReady) {
             setIsLoading(false);
             return;
         }
 
-        // Checa sessão inicial
-        supabase.auth.getSession().then(async ({ data }) => {
-            if (data.session?.user) {
-                const built = await buildSession(data.session.user);
-                setSession(built);
+        console.log("[AuthContext] Iniciando carregamento da sessão...");
+
+        // Promise para forçar o destravamento caso o getSession do SDK congele silenciosamente
+        const timeoutPromise = new Promise<{ data: any, error: any }>((_, reject) =>
+            setTimeout(() => reject(new Error("Timeout no getSession do Supabase")), 2500)
+        );
+
+        // Checa sessão inicial com Race
+        Promise.race([
+            supabase.auth.getSession(),
+            timeoutPromise
+        ]).then(async ({ data, error }) => {
+            console.log("[AuthContext] getSession finalizado", { data, error });
+            if (error) {
+                console.error("Erro no getSession:", error);
+                setIsLoading(false);
+                return;
             }
-            setIsLoading(false);
+            try {
+                if (data?.session?.user) {
+                    const built = await buildSession(data.session.user);
+                    setSession(built);
+                }
+            } catch (err) {
+                console.error("Erro crítico ao construir a sessão:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        }).catch(err => {
+            console.error("Exceção não tratada ou Timeout no getSession:", err);
+            setIsLoading(false); // Destrava a UI em caso de Exception
         });
 
         // Listener para mudanças (login, logout, refresh token)

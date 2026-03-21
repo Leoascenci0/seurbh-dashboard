@@ -15,14 +15,14 @@ interface NormativasContextData {
 const NormativasContext = createContext<NormativasContextData>({} as NormativasContextData);
 
 export function NormativasProvider({ children }: { children: ReactNode }) {
-    const { getActiveSheetsUrl, normativasFolderId } = useConfig();
+    const { getActiveSheetsUrl, getTargetSheetUrl, normativasFolderId } = useConfig();
     const [normativas, setNormativas] = useState<NormativaItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const loadNormativas = useCallback(async () => {
         setIsLoading(true);
         try {
-            const data = await fetchNormativas(getActiveSheetsUrl());
+            const data = await fetchNormativas(getActiveSheetsUrl(), getTargetSheetUrl());
             if (data && data.length > 0) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const mapped: NormativaItem[] = data.map((row: any, i: number) => ({
@@ -44,7 +44,7 @@ export function NormativasProvider({ children }: { children: ReactNode }) {
         } finally {
             setIsLoading(false);
         }
-    }, [getActiveSheetsUrl]);
+    }, [getActiveSheetsUrl, getTargetSheetUrl]);
 
     useEffect(() => {
         loadNormativas();
@@ -55,7 +55,7 @@ export function NormativasProvider({ children }: { children: ReactNode }) {
             const success = await saveNormativa({
                 ...norma,
                 'NORMATIVA_ROOT_ID': normativasFolderId || ''
-            }, getActiveSheetsUrl());
+            }, getActiveSheetsUrl(), getTargetSheetUrl());
 
             if (success) {
                 await loadNormativas();
