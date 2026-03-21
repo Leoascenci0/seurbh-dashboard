@@ -23,10 +23,13 @@ interface ConfigContextData {
 
     // Novas Listas Dinâmicas
     customCategories: string[];
+    customLoteamentoCategories: string[];
     customAssuntos: string[];
     addCategory: (cat: string) => void;
+    addLoteamentoCategory: (cat: string) => void;
     addAssunto: (assunto: string) => void;
     removeCategory: (cat: string) => void;
+    removeLoteamentoCategory: (cat: string) => void;
     removeAssunto: (assunto: string) => void;
 }
 
@@ -36,8 +39,11 @@ const DRIVE_URL_REGEX = /\/folders\/([a-zA-Z0-9-_]+)|id=([a-zA-Z0-9-_]+)/;
 
 export const defaultCategories = [
     'Alvará de Construção', 'Habite-se', 'Regularização', 'Parcelamento',
-    'Uso e Ocupação', 'Impugnação', 'Recurso', 'Desmembramento',
-    'Remembramento', 'Desdobro', 'Loteamentos e Condomínios'
+    'Uso e Ocupação', 'Impugnação', 'Recurso'
+];
+
+export const defaultLoteamentoCategories = [
+    'Desmembramento', 'Remembramento', 'Desdobro', 'Loteamentos e Condomínios'
 ];
 
 export const defaultAssuntos = [
@@ -83,6 +89,11 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
         return saved ? JSON.parse(saved) : defaultCategories;
     });
 
+    const [customLoteamentoCategories, setCustomLoteamentoCategories] = useState<string[]>(() => {
+        const saved = localStorage.getItem('seurbh_custom_loteamento_categories');
+        return saved ? JSON.parse(saved) : defaultLoteamentoCategories;
+    });
+
     const [customAssuntos, setCustomAssuntos] = useState<string[]>(() => {
         const saved = localStorage.getItem('seurbh_custom_assuntos');
         return saved ? JSON.parse(saved) : defaultAssuntos;
@@ -101,6 +112,21 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
         const newList = customCategories.filter(c => c !== cat);
         setCustomCategories(newList);
         localStorage.setItem('seurbh_custom_categories', JSON.stringify(newList));
+    };
+
+    const addLoteamentoCategory = (cat: string) => {
+        const txt = cat.trim();
+        if (txt && !customLoteamentoCategories.includes(txt)) {
+            const newList = [...customLoteamentoCategories, txt];
+            setCustomLoteamentoCategories(newList);
+            localStorage.setItem('seurbh_custom_loteamento_categories', JSON.stringify(newList));
+        }
+    };
+
+    const removeLoteamentoCategory = (cat: string) => {
+        const newList = customLoteamentoCategories.filter(c => c !== cat);
+        setCustomLoteamentoCategories(newList);
+        localStorage.setItem('seurbh_custom_loteamento_categories', JSON.stringify(newList));
     };
 
     const addAssunto = (assunto: string) => {
@@ -225,9 +251,12 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
             getActiveSheetsUrl,
             getTargetSheetUrl,
             customCategories,
+            customLoteamentoCategories,
             customAssuntos,
             addCategory,
+            addLoteamentoCategory,
             removeCategory,
+            removeLoteamentoCategory,
             addAssunto,
             removeAssunto
         }}>

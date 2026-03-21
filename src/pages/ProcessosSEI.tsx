@@ -72,7 +72,7 @@ export function ProcessosSEI({ searchQuery }: ProcessosSEIProps) {
                         className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#4a90d9] text-white text-sm font-bold hover:bg-[#3a7bc8] shadow-md shadow-[#4a90d9]/25 active:scale-95 transition-all"
                     >
                         <Plus size={16} strokeWidth={2.5} />
-                        Novo Processo SEI
+                        Novo Processo
                     </button>
                 </div>
             </div>

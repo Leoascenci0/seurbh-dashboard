@@ -129,7 +129,7 @@ export function NewProcessModal({ onClose, onSuccess }: NewProcessModalProps) {
             <div className="relative w-full max-w-2xl bg-white border border-[#dde3ee] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 <div className="flex items-center justify-between px-6 py-5 border-b border-[#dde3ee] bg-[#f8fafc] flex-shrink-0">
                     <div>
-                        <h2 className="text-base font-bold text-[#0f1f30]">Novo Processo SEI</h2>
+                        <h2 className="text-base font-bold text-[#0f1f30]">Novo Processo</h2>
                         <p className="text-xs text-[#8fa5b8] mt-0.5">Fase final de implantação com validação real</p>
                     </div>
                     <button onClick={onClose} title="Fechar" className="p-2 rounded-lg text-[#8fa5b8] hover:text-[#1e2d40] hover:bg-[#eef2f7]">
@@ -166,8 +166,8 @@ export function NewProcessModal({ onClose, onSuccess }: NewProcessModalProps) {
                         <div className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="col-span-2">
-                                    <label className={labelClass}><FileDigit size={12} className="inline mr-1" />Número do Processo</label>
-                                    <input className={inputClass} placeholder="Ex: 17.523.001234-7 ou Processo SEI" value={form.seiNumber} onChange={e => update('seiNumber', e.target.value)} />
+                                    <label className={labelClass}><FileDigit size={12} className="inline mr-1" />Número do Processo (Opcional)</label>
+                                    <input className={inputClass} placeholder="Ex: 17.523.001234-7 ou deixe em branco" value={form.seiNumber} onChange={e => update('seiNumber', e.target.value)} />
                                 </div>
                                 <div>
                                     <label className={labelClass}><User size={12} className="inline mr-1" />Requerente</label>

@@ -47,7 +47,7 @@ const glebas = [
 ];
 
 export function DynamicProcessForm({ onClose }: { onClose?: () => void }) {
-    const { customCategories, customAssuntos, addCategory, addAssunto } = useConfig();
+    const { customLoteamentoCategories, customAssuntos, addLoteamentoCategory, addAssunto } = useConfig();
     const [form, setForm] = useState<FormInputs>({
         categoria: '',
         tipoDesmembramento: 'Subdivisão',
@@ -158,7 +158,7 @@ export function DynamicProcessForm({ onClose }: { onClose?: () => void }) {
                                         className={`${selectStyle} ${errors.categoria ? 'border-red-300' : ''}`}
                                     >
                                         <option value="">Selecione a categoria...</option>
-                                        {customCategories.map(cat => (
+                                        {customLoteamentoCategories.map(cat => (
                                             <option key={cat} value={cat}>{cat}</option>
                                         ))}
                                     </select>
@@ -170,7 +170,7 @@ export function DynamicProcessForm({ onClose }: { onClose?: () => void }) {
                                     onClick={() => {
                                         const newCat = window.prompt("Nova categoria:");
                                         if (newCat && newCat.trim() !== '') {
-                                            addCategory(newCat);
+                                            addLoteamentoCategory(newCat);
                                             update('categoria', newCat.trim());
                                         }
                                     }}
