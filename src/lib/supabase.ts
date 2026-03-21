@@ -19,8 +19,9 @@ export const supabase = createClient<Database>(
     supabaseAnonKey || 'placeholder',
     {
         auth: {
-            // Mudamos a chave para escapar de um possível "navigator.locks" travado de sessões antigas
-            storageKey: 'seurbh-auth-token-v2',
+            // Usa sessionStorage para evitar dependência do navigator.locks (que causa silent hangs no dev)
+            storage: typeof window !== 'undefined' ? window.sessionStorage : undefined,
+            storageKey: 'seurbh-auth-token-v3',
             autoRefreshToken: true,
             persistSession: true,
             detectSessionInUrl: true
