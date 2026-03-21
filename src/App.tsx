@@ -6,11 +6,15 @@ import { ProcessosSEI } from './pages/ProcessosSEI';
 import { Normativas } from './pages/Normativas';
 import { Equipe } from './pages/Equipe';
 import { Placeholder } from './pages/Placeholder';
+import { LoginPage } from './pages/LoginPage';
 import { ThemeProvider } from './context/ThemeContext';
 import { ThemeCustomizer } from './components/ThemeCustomizer';
 import { ProcessosProvider } from './context/ProcessosContext';
 import { NormativasProvider } from './context/NormativasContext';
 import { ConfigProvider } from './context/ConfigContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { EquipeProvider } from './context/EquipeContext';
+import { Loader2 } from 'lucide-react';
 
 type Section =
   | 'dashboard'
@@ -104,10 +108,35 @@ function renderContent(section: Section, searchQuery: string, onNavigate: (id: s
   }
 }
 
-function App() {
+/** Conteúdo principal — só renderiza após autenticação */
+function AppContent() {
+  const { session, isLoading, isSupabaseReady } = useAuth();
   const [activeSection, setActiveSection] = useState<Section>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Loading inicial enquanto verifica sessão
+  if (isLoading) {
+    return (
+      <div style={{
+        minHeight: '100vh', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', background: '#f0f4f8',
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <Loader2 size={32} color="#3b5fa0" style={{ animation: 'spin 1s linear infinite', marginBottom: '12px' }} />
+          <p style={{ color: '#6b7a8d', fontSize: '14px', fontFamily: 'Inter, sans-serif' }}>
+            Verificando sessão...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Se Supabase está configurado e usuário não está autenticado → login
+  if (isSupabaseReady && !session.isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  // App principal (autenticado OU Supabase não configurado ainda)
   const info = sectionTitles[activeSection] || { title: 'SEURBH' };
 
   const handleNavigate = (id: string) => {
@@ -116,30 +145,37 @@ function App() {
   };
 
   return (
+    <div className="min-h-screen flex bg-[var(--bg-primary)] text-[var(--text-primary)]">
+      <Sidebar activeSection={activeSection} onSectionChange={handleNavigate} />
+      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+        <Header
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          pageTitle={info.title}
+          pageBreadcrumb={info.breadcrumb}
+        />
+        <main className="flex-1 overflow-y-auto">
+          {renderContent(activeSection, searchQuery, handleNavigate)}
+        </main>
+      </div>
+      <ThemeCustomizer />
+    </div>
+  );
+}
+
+function App() {
+  return (
     <ThemeProvider>
       <ConfigProvider>
-        <ProcessosProvider>
-          <NormativasProvider>
-            <div className="min-h-screen flex bg-[var(--bg-primary)] text-[var(--text-primary)]">
-              <Sidebar activeSection={activeSection} onSectionChange={handleNavigate} />
-
-              {/* Main content */}
-              <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
-                <Header
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  pageTitle={info.title}
-                  pageBreadcrumb={info.breadcrumb}
-                />
-                <main className="flex-1 overflow-y-auto">
-                  {renderContent(activeSection, searchQuery, handleNavigate)}
-                </main>
-              </div>
-
-              <ThemeCustomizer />
-            </div>
-          </NormativasProvider>
-        </ProcessosProvider>
+        <AuthProvider>
+          <ProcessosProvider>
+            <NormativasProvider>
+              <EquipeProvider>
+                <AppContent />
+              </EquipeProvider>
+            </NormativasProvider>
+          </ProcessosProvider>
+        </AuthProvider>
       </ConfigProvider>
     </ThemeProvider>
   );

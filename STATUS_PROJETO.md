@@ -35,22 +35,15 @@ Este documento serve como um registro do estado atual do projeto para facilitar 
 ### Trabalhos Recentes e Focos (Baseado no histórico do Antigravity)
 
 1. **Arquitetura de Separação de Setores:** Refatoração do layout principal (`MainLayout`, `Header`, `App.tsx`) para suportar múltiplos setores administrativos (ex: Urbanismo, Saúde, Fazenda), cada um com menus e componentes específicos.
-2. **Integração e Armazenamento (MinIO / Supabase):**
-   - Configuração de buckets locais/cloud (`processos-prefeitura`).
-   - Resolução de labels do menu (Storage / Armazenamento).
-   - Implementação de File Uploader e BYOK.
+2. **Integração e Armazenamento (MinIO / Supabase / Drive):**
+   - **NOVO:** Integrado Supabase Auth para gerenciar Autenticação de Usuários, Permissões baseadas em Cargos (Role-Based Access Control) e Perfis. Criação do `AuthContext` e `LoginPage`.
+   - Setup das tabelas `profiles` e `atividades` via script `setup_supabase.sql`.
+   - **Estratégia Híbrida:** O banco de informações em massa de `Processos`, `Normativas` e uploads de arquivos continuam usando a infraestrutura Zero-DB via Google Sheets/Google Drive, enquanto apenas a camada de Segurança da Interface consome o Supabase (`supabaseApi.ts`).
 3. **Visualizador DXF:** Implementação e debug para renderização correta de arquivos de geometria/desenhos diretamente no dashboard.
-4. **Interface SEI (Sistema Eletrônico de Informações):** Trabalhos de redesenho da interface SEI utilizando um tema mais moderno (variáveis dinâmicas de CSS, tons pastéis) e possivelmente criação de extensões para injetar estes temas.
-5. **Google Sheets Integration:**
-
-- `ProcessosContext` pulls/pushes to Google Sheets via `sheetsApi.ts`.
-- The script acts as a zero-DB backend that supports creating processes and retrieving data by reading the first row as columns dynamically.
-- O script foi aprimorado para **Criar Pastas no Google Drive** automaticamente ao mudar o status de um processo para "Concluído", salvando a URL gerada de volta na planilha. Ele agora suporta IDs de pastas dinâmicos enviados pelo frontend.
-- **Configuração Dinâmica (Plug & Play):** Implementado `ConfigContext` para gerenciar URLs do Google Apps Script e IDs do Drive via `localStorage`.
-- **Interface de Configuração:** Modal de Drive expandido para permitir vinculação rápida de APIs de Sheets.
-- **Recursos Técnicos:** Botão "Copiar Código do Script" adicionado ao modal para facilitar a instalação em novas planilhas pela equipe administrativa.
-- **Frontend Process Management:** Integrated context with `/processos-sei` and `/dashboard` tables for live editing/reading. Botão 1-click para concluir e gerar pasta adicionado na tabela.
-- **Diretório Corporativo (Equipe):** A página estática `Equipe.tsx` foi redesenhada para suportar a criação de perfis dinâmicos de membros da equipe (mockados em memória), incluindo modal de cadastro com validações visuais e novo design de exibição em grid com menu de ações.
+4. **Google Sheets Integration:**
+   - O script `GOOGLE_SHEETS_SCRIPT.js` atua como backend serverless para gerenciar Processos. Possui função de Criar Pastas automaticamente ao mudar o status para "Concluído".
+   - `ConfigContext` gerencia URLs e IDs dinamicamente. Modal de Drive permite vinculação rápida (Plug&Play).
+5. **Diretório Corporativo (Equipe):** Inicialmente estático/mockado, o `EquipeContext` foi redesenhado para suportar integração futura com o Supabase quando as informações dos servidores precisarem ser recuperadas dinamicamente.
 
 ---
 

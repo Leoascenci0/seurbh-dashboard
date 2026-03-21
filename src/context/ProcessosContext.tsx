@@ -29,7 +29,6 @@ export function ProcessosProvider({ children }: { children: ReactNode }) {
         try {
             const data = await fetchProcessos(getActiveSheetsUrl());
             if (data && data.length > 0) {
-                // Map as colunas genéricas da planilha para o formato do sistema
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const mapped: SeiProcess[] = data.map((row: any, i: number) => ({
                     id: row.id || row.ID || String(i + 1),
@@ -51,7 +50,6 @@ export function ProcessosProvider({ children }: { children: ReactNode }) {
                 }));
                 setProcesses(mapped);
             } else {
-                // Fallback to mock se a planilha estiver vazia ou não configurada
                 setProcesses(mockProcesses);
             }
         } catch (e) {
@@ -64,6 +62,7 @@ export function ProcessosProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         loadProcessos();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const stats = useMemo(() => {
