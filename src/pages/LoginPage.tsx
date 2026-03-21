@@ -33,24 +33,34 @@ export function LoginPage() {
             }
         } else {
             // Register Mode
-            const { data, error: signUpError } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: { full_name: nome }
+            try {
+                const timeoutPromise = new Promise<{ data: any, error: any }>((_, reject) =>
+                    setTimeout(() => reject(new Error("A conexão expirou. Verifique sua internet ou tente novamente.")), 10000)
+                );
+
+                const { data, error: signUpError } = await Promise.race([
+                    supabase.auth.signUp({
+                        email,
+                        password,
+                        options: { data: { full_name: nome } }
+                    }),
+                    timeoutPromise
+                ]);
+
+                setLoading(false);
+
+                if (signUpError) {
+                    setError(signUpError.message);
+                } else if (data.session) {
+                    window.location.reload();
+                } else {
+                    setSuccessMsg('Conta criada com sucesso! Você já pode entrar.');
+                    setMode('login');
+                    setPassword('');
                 }
-            });
-
-            setLoading(false);
-
-            if (signUpError) {
-                setError(signUpError.message);
-            } else if (data.session) {
-                window.location.reload();
-            } else {
-                setSuccessMsg('Conta criada com sucesso! Você já pode entrar.');
-                setMode('login');
-                setPassword('');
+            } catch (err: any) {
+                setLoading(false);
+                setError(err.message || String(err));
             }
         }
     };

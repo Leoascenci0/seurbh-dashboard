@@ -103,11 +103,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return { success: false, error: 'Supabase não configurado. Verifique as variáveis de ambiente.' };
         }
         try {
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            const timeoutPromise = new Promise<{ data: any, error: any }>((_, reject) =>
+                setTimeout(() => reject(new Error("Timeout: O servidor de autenticação demorou muito para responder.")), 8000)
+            );
+
+            const { error } = await Promise.race([
+                supabase.auth.signInWithPassword({ email, password }),
+                timeoutPromise
+            ]);
+
             if (error) return { success: false, error: error.message };
             return { success: true };
-        } catch (e) {
-            return { success: false, error: String(e) };
+        } catch (e: any) {
+            return { success: false, error: e.message || String(e) };
         }
     }, [isSupabaseReady]);
 
