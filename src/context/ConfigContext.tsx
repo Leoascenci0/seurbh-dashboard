@@ -20,11 +20,32 @@ interface ConfigContextData {
     clearTargetSheetConfig: () => void;
     getActiveSheetsUrl: () => string;
     getTargetSheetUrl: () => string;
+
+    // Novas Listas Dinâmicas
+    customCategories: string[];
+    customAssuntos: string[];
+    addCategory: (cat: string) => void;
+    addAssunto: (assunto: string) => void;
+    removeCategory: (cat: string) => void;
+    removeAssunto: (assunto: string) => void;
 }
 
 const ConfigContext = createContext<ConfigContextData>({} as ConfigContextData);
 
 const DRIVE_URL_REGEX = /\/folders\/([a-zA-Z0-9-_]+)|id=([a-zA-Z0-9-_]+)/;
+
+export const defaultCategories = [
+    'Alvará de Construção', 'Habite-se', 'Regularização', 'Parcelamento',
+    'Uso e Ocupação', 'Impugnação', 'Recurso', 'Desmembramento',
+    'Remembramento', 'Desdobro', 'Loteamentos e Condomínios'
+];
+
+export const defaultAssuntos = [
+    'Reserva de Nome de Loteamento', 'Viabilidade', 'LPCG', 'Mapa de Aptidão',
+    'Diretriz Viária', 'Aprovação Prévia', 'Conferência de Eixo',
+    'Projetos Complementares', 'Processo de Caução', 'Aprovação Final',
+    'Baixa de Lotes Caucionados', 'Liberação para Construção'
+];
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
     const [driveRootFolderId, setDriveRootFolderId] = useState<string | null>(() => {
@@ -54,6 +75,47 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 
     const getTargetSheetUrl = () => {
         return targetSheetUrl || "";
+    };
+
+    // Estados das Listas Dinâmicas
+    const [customCategories, setCustomCategories] = useState<string[]>(() => {
+        const saved = localStorage.getItem('seurbh_custom_categories');
+        return saved ? JSON.parse(saved) : defaultCategories;
+    });
+
+    const [customAssuntos, setCustomAssuntos] = useState<string[]>(() => {
+        const saved = localStorage.getItem('seurbh_custom_assuntos');
+        return saved ? JSON.parse(saved) : defaultAssuntos;
+    });
+
+    const addCategory = (cat: string) => {
+        const txt = cat.trim();
+        if (txt && !customCategories.includes(txt)) {
+            const newList = [...customCategories, txt];
+            setCustomCategories(newList);
+            localStorage.setItem('seurbh_custom_categories', JSON.stringify(newList));
+        }
+    };
+
+    const removeCategory = (cat: string) => {
+        const newList = customCategories.filter(c => c !== cat);
+        setCustomCategories(newList);
+        localStorage.setItem('seurbh_custom_categories', JSON.stringify(newList));
+    };
+
+    const addAssunto = (assunto: string) => {
+        const txt = assunto.trim();
+        if (txt && !customAssuntos.includes(txt)) {
+            const newList = [...customAssuntos, txt];
+            setCustomAssuntos(newList);
+            localStorage.setItem('seurbh_custom_assuntos', JSON.stringify(newList));
+        }
+    };
+
+    const removeAssunto = (assunto: string) => {
+        const newList = customAssuntos.filter(a => a !== assunto);
+        setCustomAssuntos(newList);
+        localStorage.setItem('seurbh_custom_assuntos', JSON.stringify(newList));
     };
 
     const updateDriveId = (urlOrId: string) => {
@@ -161,7 +223,13 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
             clearSheetsConfig,
             clearTargetSheetConfig,
             getActiveSheetsUrl,
-            getTargetSheetUrl
+            getTargetSheetUrl,
+            customCategories,
+            customAssuntos,
+            addCategory,
+            removeCategory,
+            addAssunto,
+            removeAssunto
         }}>
             {children}
         </ConfigContext.Provider>

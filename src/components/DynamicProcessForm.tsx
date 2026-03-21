@@ -9,8 +9,10 @@ import {
     ArrowRight,
     CheckCircle2,
     X,
-    AlertCircle
+    AlertCircle,
+    PenLine
 } from 'lucide-react';
+import { useConfig } from '../context/ConfigContext';
 
 interface FormInputs {
     categoria: string;
@@ -25,27 +27,7 @@ interface FormInputs {
     seiNumber: string;
 }
 
-const categoriasPrincipais = [
-    'Desmembramento',
-    'Remembramento',
-    'Desdobro',
-    'Loteamentos e Condomínios'
-];
-
-const fluxoAprovacao = [
-    'Reserva de Nome de Loteamento',
-    'Viabilidade',
-    'LPCG',
-    'Mapa de Aptidão',
-    'Diretriz Viária',
-    'Aprovação Prévia',
-    'Conferência de Eixo',
-    'Projetos Complementares',
-    'Processo de Caução',
-    'Aprovação Final',
-    'Baixa de Lotes Caucionados',
-    'Liberação para Construção'
-];
+// Arrays dinâmicos agora extraídos do useConfig()
 
 const glebas = [
     'Gleba Patrimônio Iguatemi',
@@ -65,6 +47,7 @@ const glebas = [
 ];
 
 export function DynamicProcessForm({ onClose }: { onClose?: () => void }) {
+    const { customCategories, customAssuntos, addCategory, addAssunto } = useConfig();
     const [form, setForm] = useState<FormInputs>({
         categoria: '',
         tipoDesmembramento: 'Subdivisão',
@@ -166,18 +149,35 @@ export function DynamicProcessForm({ onClose }: { onClose?: () => void }) {
 
                         <div>
                             <label className={labelStyle}>Categoria Principal</label>
-                            <div className="relative">
-                                <select
-                                    value={form.categoria}
-                                    onChange={e => update('categoria', e.target.value)}
-                                    className={`${selectStyle} ${errors.categoria ? 'border-red-300' : ''}`}
+                            <div className="flex gap-2 items-center">
+                                <div className="relative flex-1">
+                                    <select
+                                        title="Categoria"
+                                        value={form.categoria}
+                                        onChange={e => update('categoria', e.target.value)}
+                                        className={`${selectStyle} ${errors.categoria ? 'border-red-300' : ''}`}
+                                    >
+                                        <option value="">Selecione a categoria...</option>
+                                        {customCategories.map(cat => (
+                                            <option key={cat} value={cat}>{cat}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8fa5b8] pointer-events-none" size={16} />
+                                </div>
+                                <button
+                                    type="button"
+                                    title="Nova categoria de loteamento"
+                                    onClick={() => {
+                                        const newCat = window.prompt("Nova categoria:");
+                                        if (newCat && newCat.trim() !== '') {
+                                            addCategory(newCat);
+                                            update('categoria', newCat.trim());
+                                        }
+                                    }}
+                                    className="p-2.5 rounded-lg border border-[#dde3ee] bg-[#f8fafc] text-[#4a90d9] hover:bg-[#eef2f7] transition-all"
                                 >
-                                    <option value="">Selecione a categoria...</option>
-                                    {categoriasPrincipais.map(cat => (
-                                        <option key={cat} value={cat}>{cat}</option>
-                                    ))}
-                                </select>
-                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8fa5b8] pointer-events-none" size={16} />
+                                    <PenLine size={16} />
+                                </button>
                             </div>
                             {errors.categoria && <span className="text-red-500 text-[10px] mt-1 block px-1">{errors.categoria}</span>}
                         </div>
@@ -249,18 +249,35 @@ export function DynamicProcessForm({ onClose }: { onClose?: () => void }) {
 
                                     <div className="bg-[#f8fafc] p-5 rounded-xl border border-[#dde3ee]">
                                         <label className={labelStyle}>Assunto do Processo</label>
-                                        <div className="relative">
-                                            <select
-                                                value={form.assuntoProcesso}
-                                                onChange={e => update('assuntoProcesso', e.target.value)}
-                                                className={selectStyle}
+                                        <div className="flex gap-2 items-center">
+                                            <div className="relative flex-1">
+                                                <select
+                                                    title="Assunto do Processo"
+                                                    value={form.assuntoProcesso}
+                                                    onChange={e => update('assuntoProcesso', e.target.value)}
+                                                    className={selectStyle}
+                                                >
+                                                    <option value="">Selecione a fase...</option>
+                                                    {customAssuntos.map(item => (
+                                                        <option key={item} value={item}>{item}</option>
+                                                    ))}
+                                                </select>
+                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8fa5b8] pointer-events-none" size={16} />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                title="Novo assunto"
+                                                onClick={() => {
+                                                    const newAssunto = window.prompt("Novo assunto:");
+                                                    if (newAssunto && newAssunto.trim() !== '') {
+                                                        addAssunto(newAssunto);
+                                                        update('assuntoProcesso', newAssunto.trim());
+                                                    }
+                                                }}
+                                                className="p-2.5 rounded-lg border border-[#dde3ee] bg-[#f8fafc] text-[#4a90d9] hover:bg-[#eef2f7] transition-all"
                                             >
-                                                <option value="">Selecione a fase...</option>
-                                                {fluxoAprovacao.map(item => (
-                                                    <option key={item} value={item}>{item}</option>
-                                                ))}
-                                            </select>
-                                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8fa5b8] pointer-events-none" size={16} />
+                                                <PenLine size={16} />
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

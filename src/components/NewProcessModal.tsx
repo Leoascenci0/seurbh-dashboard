@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, FileDigit, User, MapPin, Tag, AlertTriangle, ChevronDown } from 'lucide-react';
+import { X, FileDigit, User, MapPin, Tag, AlertTriangle, ChevronDown, PenLine } from 'lucide-react';
 import { UploadZone } from './UploadZone';
 import type { ProcessCategory, ProcessStatus } from '../types';
 import { saveProcesso, createDriveFolder } from '../data/sheetsApi';
@@ -11,15 +11,7 @@ interface NewProcessModalProps {
     onSuccess: () => void;
 }
 
-const categories: ProcessCategory[] = [
-    'Alvará de Construção',
-    'Habite-se',
-    'Regularização',
-    'Parcelamento',
-    'Uso e Ocupação',
-    'Impugnação',
-    'Recurso',
-];
+// Categorias globais providas pelo ConfigContext agora.
 
 const technicians = [
     'Arq. Patricia Melo',
@@ -46,7 +38,7 @@ const glebas = [
 ];
 
 export function NewProcessModal({ onClose, onSuccess }: NewProcessModalProps) {
-    const { getActiveSheetsUrl, getTargetSheetUrl, driveRootFolderId } = useConfig();
+    const { getActiveSheetsUrl, getTargetSheetUrl, driveRootFolderId, customCategories, addCategory } = useConfig();
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState<string>('');
@@ -215,12 +207,28 @@ export function NewProcessModal({ onClose, onSuccess }: NewProcessModalProps) {
                         <div className="space-y-4">
                             <div>
                                 <label className={labelClass}><Tag size={12} className="inline mr-1" />Categoria</label>
-                                <div className="relative">
-                                    <select title="Categoria" className={`${inputClass} appearance-none pr-8`} value={form.category} onChange={e => update('category', e.target.value)}>
-                                        <option value="">Selecione...</option>
-                                        {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                                    </select>
-                                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8fa5b8] pointer-events-none" />
+                                <div className="flex gap-2 items-center">
+                                    <div className="relative flex-1">
+                                        <select title="Categoria" className={`${inputClass} appearance-none pr-8`} value={form.category} onChange={e => update('category', e.target.value)}>
+                                            <option value="">Selecione...</option>
+                                            {customCategories.map(c => <option key={c} value={c}>{c}</option>)}
+                                        </select>
+                                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8fa5b8] pointer-events-none" />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        title="Adicionar nova categoria"
+                                        onClick={() => {
+                                            const newCat = window.prompt("Digite o nome da nova categoria:");
+                                            if (newCat && newCat.trim() !== '') {
+                                                addCategory(newCat);
+                                                update('category', newCat.trim());
+                                            }
+                                        }}
+                                        className="p-2.5 rounded-lg border border-[#dde3ee] bg-[#f8fafc] text-[#4a90d9] hover:bg-[#eef2f7] transition-all"
+                                    >
+                                        <PenLine size={16} />
+                                    </button>
                                 </div>
                             </div>
                             <div>
