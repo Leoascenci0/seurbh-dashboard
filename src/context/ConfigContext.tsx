@@ -31,6 +31,9 @@ interface ConfigContextData {
     removeCategory: (cat: string) => void;
     removeLoteamentoCategory: (cat: string) => void;
     removeAssunto: (assunto: string) => void;
+    replaceCategories: (cats: string[]) => void;
+    replaceLoteamentoCategories: (cats: string[]) => void;
+    replaceAssuntos: (assuntos: string[]) => void;
 }
 
 const ConfigContext = createContext<ConfigContextData>({} as ConfigContextData);
@@ -142,6 +145,21 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
         const newList = customAssuntos.filter(a => a !== assunto);
         setCustomAssuntos(newList);
         localStorage.setItem('seurbh_custom_assuntos', JSON.stringify(newList));
+    };
+
+    const replaceCategories = (cats: string[]) => {
+        setCustomCategories(cats);
+        localStorage.setItem('seurbh_custom_categories', JSON.stringify(cats));
+    };
+
+    const replaceLoteamentoCategories = (cats: string[]) => {
+        setCustomLoteamentoCategories(cats);
+        localStorage.setItem('seurbh_custom_loteamento_categories', JSON.stringify(cats));
+    };
+
+    const replaceAssuntos = (assuntos: string[]) => {
+        setCustomAssuntos(assuntos);
+        localStorage.setItem('seurbh_custom_assuntos', JSON.stringify(assuntos));
     };
 
     const updateDriveId = (urlOrId: string) => {
@@ -258,7 +276,10 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
             removeCategory,
             removeLoteamentoCategory,
             addAssunto,
-            removeAssunto
+            removeAssunto,
+            replaceCategories,
+            replaceLoteamentoCategories,
+            replaceAssuntos
         }}>
             {children}
         </ConfigContext.Provider>

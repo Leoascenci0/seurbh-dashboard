@@ -13,6 +13,7 @@ import {
     PenLine
 } from 'lucide-react';
 import { useConfig } from '../context/ConfigContext';
+import { CategoryManagerModal } from './CategoryManagerModal';
 
 interface FormInputs {
     categoria: string;
@@ -47,7 +48,9 @@ const glebas = [
 ];
 
 export function DynamicProcessForm({ onClose }: { onClose?: () => void }) {
-    const { customLoteamentoCategories, customAssuntos, addLoteamentoCategory, addAssunto } = useConfig();
+    const { customLoteamentoCategories, customAssuntos, replaceLoteamentoCategories, replaceAssuntos } = useConfig();
+    const [isLoteCatModalOpen, setIsLoteCatModalOpen] = useState(false);
+    const [isAssuntosModalOpen, setIsAssuntosModalOpen] = useState(false);
     const [form, setForm] = useState<FormInputs>({
         categoria: '',
         tipoDesmembramento: 'Subdivisão',
@@ -166,14 +169,8 @@ export function DynamicProcessForm({ onClose }: { onClose?: () => void }) {
                                 </div>
                                 <button
                                     type="button"
-                                    title="Nova categoria de loteamento"
-                                    onClick={() => {
-                                        const newCat = window.prompt("Nova categoria:");
-                                        if (newCat && newCat.trim() !== '') {
-                                            addLoteamentoCategory(newCat);
-                                            update('categoria', newCat.trim());
-                                        }
-                                    }}
+                                    title="Gerenciar categorias de loteamento"
+                                    onClick={() => setIsLoteCatModalOpen(true)}
                                     className="p-2.5 rounded-lg border border-[#dde3ee] bg-[#f8fafc] text-[#4a90d9] hover:bg-[#eef2f7] transition-all"
                                 >
                                     <PenLine size={16} />
@@ -266,14 +263,8 @@ export function DynamicProcessForm({ onClose }: { onClose?: () => void }) {
                                             </div>
                                             <button
                                                 type="button"
-                                                title="Novo assunto"
-                                                onClick={() => {
-                                                    const newAssunto = window.prompt("Novo assunto:");
-                                                    if (newAssunto && newAssunto.trim() !== '') {
-                                                        addAssunto(newAssunto);
-                                                        update('assuntoProcesso', newAssunto.trim());
-                                                    }
-                                                }}
+                                                title="Gerenciar assuntos"
+                                                onClick={() => setIsAssuntosModalOpen(true)}
                                                 className="p-2.5 rounded-lg border border-[#dde3ee] bg-[#f8fafc] text-[#4a90d9] hover:bg-[#eef2f7] transition-all"
                                             >
                                                 <PenLine size={16} />
@@ -369,6 +360,24 @@ export function DynamicProcessForm({ onClose }: { onClose?: () => void }) {
           }
         `}} />
             </div>
+            {/* Modais Gerenciadores de Categoria (Avançado) */}
+            {isLoteCatModalOpen && (
+                <CategoryManagerModal
+                    title="Categorias de Loteamento"
+                    items={customLoteamentoCategories}
+                    onSave={(newItems) => replaceLoteamentoCategories(newItems)}
+                    onClose={() => setIsLoteCatModalOpen(false)}
+                />
+            )}
+
+            {isAssuntosModalOpen && (
+                <CategoryManagerModal
+                    title="Assuntos do Loteamento"
+                    items={customAssuntos}
+                    onSave={(newItems) => replaceAssuntos(newItems)}
+                    onClose={() => setIsAssuntosModalOpen(false)}
+                />
+            )}
         </div>
     );
 }

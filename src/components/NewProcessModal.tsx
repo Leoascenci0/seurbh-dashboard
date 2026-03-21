@@ -5,6 +5,7 @@ import type { ProcessCategory, ProcessStatus } from '../types';
 import { saveProcesso, createDriveFolder } from '../data/sheetsApi';
 import { useProcessos } from '../context/ProcessosContext';
 import { useConfig } from '../context/ConfigContext';
+import { CategoryManagerModal } from './CategoryManagerModal';
 
 interface NewProcessModalProps {
     onClose: () => void;
@@ -38,8 +39,9 @@ const glebas = [
 ];
 
 export function NewProcessModal({ onClose, onSuccess }: NewProcessModalProps) {
-    const { getActiveSheetsUrl, getTargetSheetUrl, driveRootFolderId, customCategories, addCategory } = useConfig();
+    const { getActiveSheetsUrl, getTargetSheetUrl, driveRootFolderId, customCategories, replaceCategories } = useConfig();
     const [step, setStep] = useState(1);
+    const [isCatModalOpen, setIsCatModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState<string>('');
     const [validationError, setValidationError] = useState<string | null>(null);
@@ -217,14 +219,8 @@ export function NewProcessModal({ onClose, onSuccess }: NewProcessModalProps) {
                                     </div>
                                     <button
                                         type="button"
-                                        title="Adicionar nova categoria"
-                                        onClick={() => {
-                                            const newCat = window.prompt("Digite o nome da nova categoria:");
-                                            if (newCat && newCat.trim() !== '') {
-                                                addCategory(newCat);
-                                                update('category', newCat.trim());
-                                            }
-                                        }}
+                                        title="Gerenciar categorias"
+                                        onClick={() => setIsCatModalOpen(true)}
                                         className="p-2.5 rounded-lg border border-[#dde3ee] bg-[#f8fafc] text-[#4a90d9] hover:bg-[#eef2f7] transition-all"
                                     >
                                         <PenLine size={16} />
@@ -277,6 +273,14 @@ export function NewProcessModal({ onClose, onSuccess }: NewProcessModalProps) {
                     </button>
                 </div>
             </div>
+            {isCatModalOpen && (
+                <CategoryManagerModal
+                    title="Categorias de Processo"
+                    items={customCategories}
+                    onSave={(newItems) => replaceCategories(newItems)}
+                    onClose={() => setIsCatModalOpen(false)}
+                />
+            )}
         </div>
     );
 }
