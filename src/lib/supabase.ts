@@ -16,5 +16,14 @@ export const isSupabaseConfigured = (): boolean => {
 
 export const supabase = createClient<Database>(
     supabaseUrl || 'https://placeholder.supabase.co',
-    supabaseAnonKey || 'placeholder'
+    supabaseAnonKey || 'placeholder',
+    {
+        auth: {
+            // Mudamos a chave para escapar de um possível "navigator.locks" travado de sessões antigas
+            storageKey: 'seurbh-auth-token-v2',
+            autoRefreshToken: true,
+            persistSession: true,
+            detectSessionInUrl: true
+        }
+    }
 );
