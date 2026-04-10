@@ -82,7 +82,7 @@ export function NewProcessModal({ onClose, onSuccess }: NewProcessModalProps) {
                     const reqFolderName = form.requerente.split(' ')[0] || form.requerente;
                     const folderName = `${form.seiNumber} - ${reqFolderName}`;
                     const driveRes = await createDriveFolder(folderName, driveRootFolderId, getActiveSheetsUrl());
-                    newDriveLink = driveRes.folderUrl;
+                    newDriveLink = driveRes.folderUrl ?? '';
                 } catch (e) {
                     console.error("Falha ao criar pasta, prosseguindo sem ela", e);
                 }

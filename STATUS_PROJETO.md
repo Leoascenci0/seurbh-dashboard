@@ -44,10 +44,47 @@ Este documento serve como um registro do estado atual do projeto para facilitar 
    - O script `GOOGLE_SHEETS_SCRIPT.js` atua como backend serverless para gerenciar Processos. Possui função de Criar Pastas automaticamente ao mudar o status para "Concluído".
    - `ConfigContext` gerencia URLs e IDs dinamicamente. Modal de Drive permite vinculação rápida (Plug&Play).
 5. **Diretório Corporativo (Equipe):** Inicialmente estático/mockado, o `EquipeContext` foi redesenhado para suportar integração futura com o Supabase quando as informações dos servidores precisarem ser recuperadas dinamicamente.
+6. **[2026-04-09] Wizard de Novo Loteamento — `DynamicProcessForm.tsx` redesenhado:**
+   - **O quê:** Reformulação completa da interface de cadastro de novo processo de parcelamento (loteamentos, desmembramentos, remembramentos, desdobros).
+   - **Como ficou:** Wizard de 3 etapas: (1) Seleção visual por cards clicáveis com ícone + descrição, (2) Formulário dinâmico por categoria com validação inline, tooltips de ajuda e feedback visual por campo, (3) Tela de confirmação/resumo antes de salvar.
+   - **Técnico:** Node.js LTS instalado no notebook via `winget`. Build executado com `npm install + npx tsc -b + npx vite build`. Servidor `serve.ps1` atualizado automaticamente.
+
+7. **[2026-04-10] Implementação da Página de Informações Gerais:**
+   - **O quê:** Criação de uma central de comando e avisos para a equipe.
+   - **Detalhes:** Interface moderna com Hero Section (gradiente), Mural de Avisos (cards com tipos de alerta), Acesso Rápido a sistemas externos (SEI, GeoMaringá) e base de conhecimento.
+   - **Técnico:** Componente funcional `Informacoes.tsx`, integrado às rotas no `App.tsx` e estilizado com Tailwind 4 e Lucide Icons.
+
+8. **[2026-04-10] Chat Interno da Equipe — `ChatWidget.tsx` implementado:**
+   - **O quê:** Sistema de mensagens em tempo real para servidores da SEURBH.
+   - **Funcionalidades:** Canal Geral, Chat Privado 1-a-1, Grupos personalizados, Notificação sonora (Web Audio API) com toggle de ativação/desativação, confirmação de leitura (✓ enviado / ✓✓ visualizado), autocorretor em Português-BR nativo.
+   - **Técnico:** Widget flutuante integrado ao layout principal (`App.tsx`), API em `chatApi.ts` usando Supabase Realtime (WebSocket). Script SQL de setup em `setup_chat_supabase.sql`.
+
+9. **[2026-04-10] Sistema Funcional — Google Drive + Sheets v2.0:**
+   - **Apps Script Reescrito (`GOOGLE_SHEETS_SCRIPT.js` v2.0):** Backend completo com ações: `init_infra`, `fetch_processos`, `save_process`, `fetch_normativas`, `save_normativa`, `fetch_equipe`, `save_membro`, `fetch_dados_cidade`, `save_dado_cidade`, `fetch_modelos`, `list_drive_folder`, `create_process_folder`. Cria automaticamente abas e subpastas no Drive na inicialização.
+   - **sheetsApi.ts Reescrito:** Tipagem forte, todas as funções necessárias, suporte a ping, e função `initInfrastructure` com 3 parâmetros (apiUrl, sheetUrl, driveFolderId).
+   - **Nova Página `Modelos.tsx`:** Biblioteca de pranchas, documentos e templates. Tabas por tipo, integração com Drive e Sheets, modo grid/lista.
+   - **Nova Página `DadosCidade.tsx`:** Indicadores municipais por categoria (Urbanismo, Habitação, Ambiental, Social, Infraestrutura). Formulário inline para adicionar novos indicadores. Dados demo exibidos enquanto Sheets não está configurado.
+   - **Contextos atualizados:** `ProcessosContext` e `NormativasContext` com flag `isMock`, recarregamento automático e feedback de erros.
+   - **Chave Supabase:** Arquivo `.env` com credenciais reais criado no notebook. Build com chaves integradas gerado com sucesso.
+   - **Porta:** Servidor local rodando na **porta 8002** (8001 bloqueada pelo sistema do Windows).
+
+## 📋 Pendências e Próximos Passos
+
+1. **[ALTA — MANUAL] Implantar Apps Script v2.0:** O usuário precisa:
+   - Abrir a planilha Google Sheets (dentro da pasta-mãe do Drive)
+   - Extensões → Apps Script → Colar o conteúdo do `GOOGLE_SHEETS_SCRIPT.js`
+   - Implantar como Web App → copiar a URL
+   - Colar a URL no sistema: Configurações → Apps Script URL
+   - Clicar em "Inicializar" para criar abas e subpastas automaticamente
+
+2. **[ALTA] Equipe → Sheets real:** Quando o Apps Script estiver ativo, habilitar carregamento da equipe pelo `fetch_equipe`.
+3. **[MÉDIA] Chat → Executar SQL no Supabase:** `setup_chat_supabase.sql` precisa ser executado no painel do Supabase para ativar o chat em tempo real.
+4. **[BAIXA] Busca Global:** Ajustar o Header para filtrar dados de acordo com a página ativa.
 
 ---
 
 _Dica para o Antigravity (IA): Se o usuário solicitar continuar o trabalho, leia este arquivo para recuperar o contexto arquitetural e o que foi feito mais recentemente._
 
 > **⚠️ INSTRUÇÃO CRÍTICA PARA A IA (ANTIGRAVITY):**
+
 > Sempre que você finalizar uma nova tarefa, desenvolver uma nova funcionalidade, corrigir um bug importante ou antes de encerrar uma sessão de trabalho com o usuário, você **DEVE** atualizar este arquivo (`STATUS_PROJETO.md`). Documente resumidamente o que foi feito, as decisões tomadas e o estado atual do projeto para manter a memória sempre sincronizada no Google Drive. Não pergunte se deve atualizar, faça isso de forma proativa.

@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import type { SeiProcess, ProcessStatus } from '../types';
-import { concluirProcesso } from '../data/sheetsApi';
+import { saveProcesso } from '../data/sheetsApi';
 import { useProcessos } from '../context/ProcessosContext';
 import { useConfig } from '../context/ConfigContext';
 
@@ -88,17 +88,22 @@ export function ProcessTable({ processes, searchQuery }: ProcessTableProps) {
         </span>
     );
 
-    const handleConcluir = async (e: React.MouseEvent, processId: string, seiNumber: string) => {
+    const handleConcluir = async (e: React.MouseEvent, processId: string, _seiNumber: string) => {
         e.stopPropagation();
         setConcluindoId(processId);
 
-        const success = await concluirProcesso(seiNumber, driveRootFolderId, getActiveSheetsUrl());
-        if (success) {
+        // Marca o processo com link de Drive pendente — o link é gerado no Apps Script ao salvar.
+        // Funcionalidade de concluir via Apps Script foi unificada no save_process.
+        const apiUrl = getActiveSheetsUrl();
+        const _dummy = await saveProcesso(
+            { ID: processId, 'SITUAÇÃO': 'Concluído' },
+            apiUrl, apiUrl, driveRootFolderId
+        );
+        if (_dummy.success) {
             await refreshProcessos();
         } else {
             alert('Falha ao concluir processo. Tente novamente mais tarde.');
         }
-
         setConcluindoId(null);
     };
 

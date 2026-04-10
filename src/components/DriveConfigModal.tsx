@@ -112,8 +112,12 @@ export function DriveConfigModal({ isOpen, onClose }: DriveConfigModalProps) {
         setFeedback({ type: 'success', message: 'Enviando comandos para o robô. Aguarde...', target: 'init' });
 
         try {
-            const resp = await initInfrastructure(sheetUrl, robotUrl);
-            setFeedback({ type: 'success', message: 'Sucesso! Planilha preparada com abas e colunas.', target: 'init' });
+            const result = await initInfrastructure(robotUrl, sheetUrl, driveRootFolderId);
+            if (result.success) {
+                setFeedback({ type: 'success', message: 'Sucesso! Planilha preparada com abas e colunas.', target: 'init' });
+            } else {
+                setFeedback({ type: 'error', message: result.error || 'Erro ao comunicar com o Google.', target: 'init' });
+            }
             setTimeout(() => setFeedback(null), 6000);
         } catch (e: any) {
             setFeedback({ type: 'error', message: e.message || 'Erro ao comunicar com o Google.', target: 'init' });

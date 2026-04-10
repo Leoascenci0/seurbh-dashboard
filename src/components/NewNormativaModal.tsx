@@ -46,8 +46,8 @@ export function NewNormativaModal({ isOpen, onClose }: NewNormativaModalProps) {
 
         setIsLoading(true);
         try {
-            const success = await addNormativa(form);
-            if (success) {
+            const result = await addNormativa(form);
+            if (result.success) {
                 onClose();
                 setStep(1);
                 setForm({
@@ -58,7 +58,7 @@ export function NewNormativaModal({ isOpen, onClose }: NewNormativaModalProps) {
                     ementa: '',
                 });
             } else {
-                setValidationError('Erro ao salvar normativa na planilha.');
+                setValidationError(result.error || 'Erro ao salvar normativa na planilha.');
             }
         } catch (error) {
             console.error(error);

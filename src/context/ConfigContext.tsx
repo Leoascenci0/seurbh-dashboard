@@ -58,7 +58,9 @@ export const defaultAssuntos = [
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
     const [driveRootFolderId, setDriveRootFolderId] = useState<string | null>(() => {
-        return localStorage.getItem('seurbh_drive_root_id');
+        return localStorage.getItem('seurbh_drive_root_id')
+            || import.meta.env.VITE_DRIVE_ROOT_FOLDER_ID
+            || null;
     });
 
     const [normativasFolderId, setNormativasFolderId] = useState<string | null>(() => {
@@ -66,11 +68,15 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     });
 
     const [sheetsApiUrl, setSheetsApiUrl] = useState<string | null>(() => {
-        return localStorage.getItem('seurbh_sheets_api_url');
+        return localStorage.getItem('seurbh_sheets_api_url')
+            || import.meta.env.VITE_GOOGLE_SHEETS_API_URL
+            || null;
     });
 
     const [targetSheetUrl, setTargetSheetUrl] = useState<string | null>(() => {
-        return localStorage.getItem('seurbh_target_sheet_url');
+        return localStorage.getItem('seurbh_target_sheet_url')
+            || import.meta.env.VITE_TARGET_SHEET_URL
+            || null;
     });
 
     const isDriveLinked = !!driveRootFolderId;

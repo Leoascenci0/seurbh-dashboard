@@ -3,7 +3,7 @@
 #  Porta: 8001  |  Frontend: ./dist/
 # ============================================================
 
-$port   = 8001
+$port   = 8002
 $config = "$PSScriptRoot\config.json"
 
 # Lógica condicional: Modo Produção (Casa) vs Modo Dev (Trabalho)
@@ -307,7 +307,9 @@ try {
             $content = [System.IO.File]::ReadAllBytes($fullPath)
             $response.ContentType = Get-MimeType ([System.IO.Path]::GetExtension($fullPath))
             $response.ContentLength64 = $content.Length
-            $response.OutputStream.Write($content, 0, $content.Length)
+            if ($method -ne "HEAD") {
+                $response.OutputStream.Write($content, 0, $content.Length)
+            }
         } else {
             # SPA Fallback or Error message
             $indexFile = if ($root -match "dist$") { "index.html" } else { "index-dev.html" }
@@ -317,7 +319,9 @@ try {
                 $content = [System.IO.File]::ReadAllBytes($index)
                 $response.ContentType = "text/html; charset=utf-8"
                 $response.ContentLength64 = $content.Length
-                $response.OutputStream.Write($content, 0, $content.Length)
+                if ($method -ne "HEAD") {
+                    $response.OutputStream.Write($content, 0, $content.Length)
+                }
             } else {
                 # Handle gracefully if both files are missing
                 $errorMsg = "API OK! Mas nenhum arquivo de frontend (index.html ou index-dev.html) foi encontrado."

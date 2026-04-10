@@ -5,7 +5,10 @@ import { Dashboard } from './pages/Dashboard';
 import { ProcessosSEI } from './pages/ProcessosSEI';
 import { Normativas } from './pages/Normativas';
 import { Equipe } from './pages/Equipe';
-import { Placeholder } from './pages/Placeholder';
+import { Informacoes } from './pages/Informacoes';
+import { Modelos } from './pages/Modelos';
+import { DadosCidade } from './pages/DadosCidade';
+
 import { LoginPage } from './pages/LoginPage';
 import { ThemeProvider } from './context/ThemeContext';
 import { ThemeCustomizer } from './components/ThemeCustomizer';
@@ -14,6 +17,7 @@ import { NormativasProvider } from './context/NormativasContext';
 import { ConfigProvider } from './context/ConfigContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { EquipeProvider } from './context/EquipeContext';
+import { ChatWidget } from './components/ChatWidget';
 import { Loader2 } from 'lucide-react';
 
 type Section =
@@ -80,29 +84,14 @@ function renderContent(section: Section, searchQuery: string, onNavigate: (id: s
     case 'equipe':
       return <Equipe />;
     case 'dados-cidade':
-      return (
-        <Placeholder
-          title="Dados da Cidade"
-          description="Esta área conterá informações gerais, relatórios e dados estatísticos do município de Maringá relacionados à urbanismo e habitação."
-        />
-      );
+      return <DadosCidade />;
     case 'modelos':
     case 'modelos-pranchas':
     case 'modelos-documentos':
     case 'modelos-templates':
-      return (
-        <Placeholder
-          title={sectionTitles[section].title}
-          description="Biblioteca de modelos padronizados de pranchas, documentos e templates para uso nos processos SEI da SEURBH."
-        />
-      );
+      return <Modelos />;
     case 'informacoes':
-      return (
-        <Placeholder
-          title="Informações Gerais"
-          description="Central de informações, comunicados internos e avisos relevantes para a equipe da SEURBH."
-        />
-      );
+      return <Informacoes />;
     default:
       return <Dashboard onNavigate={onNavigate} />;
   }
@@ -159,6 +148,7 @@ function AppContent() {
         </main>
       </div>
       <ThemeCustomizer />
+      <ChatWidget />
     </div>
   );
 }

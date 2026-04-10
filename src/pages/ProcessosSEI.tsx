@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { NewProcessModal } from '../components/NewProcessModal';
 import { DynamicProcessForm } from '../components/DynamicProcessForm';
-import { Database, Plus, TrendingUp, Clock, CheckCircle, AlertTriangle, Activity } from 'lucide-react';
+import { Plus, TrendingUp, Clock, CheckCircle, AlertTriangle, Activity } from 'lucide-react';
 import { ProcessTable } from '../components/ProcessTable';
 import { useProcessos } from '../context/ProcessosContext';
 
@@ -31,12 +30,11 @@ function StatCard({ icon, label, value, sub, color, bg, border }: {
 
 export function ProcessosSEI({ searchQuery }: ProcessosSEIProps) {
     const { processes, dashboardStats, isLoading } = useProcessos();
-    const [showNewModal, setShowNewModal] = useState(false);
     const [showDynamicModal, setShowDynamicModal] = useState(false);
     const [successToast, setSuccessToast] = useState(false);
 
     const handleSuccess = () => {
-        setShowNewModal(false);
+        setShowDynamicModal(false);
         setSuccessToast(true);
         setTimeout(() => setSuccessToast(false), 4000);
     };
@@ -59,22 +57,13 @@ export function ProcessosSEI({ searchQuery }: ProcessosSEIProps) {
                         <Activity size={11} /> Atualizado em {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
                     </p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => setShowDynamicModal(true)}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#2a475e] text-[#66c0f4] text-sm font-bold hover:bg-[#1d3e5a] border border-[#2a475e] shadow-md transition-all active:scale-95"
-                    >
-                        <Database size={16} />
-                        Novo Loteamento
-                    </button>
-                    <button
-                        onClick={() => setShowNewModal(true)}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#4a90d9] text-white text-sm font-bold hover:bg-[#3a7bc8] shadow-md shadow-[#4a90d9]/25 active:scale-95 transition-all"
-                    >
-                        <Plus size={16} strokeWidth={2.5} />
-                        Novo Processo
-                    </button>
-                </div>
+                <button
+                    onClick={() => setShowDynamicModal(true)}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#4a90d9] text-white text-sm font-bold hover:bg-[#3a7bc8] shadow-md shadow-[#4a90d9]/25 active:scale-95 transition-all"
+                >
+                    <Plus size={16} strokeWidth={2.5} />
+                    Processo Novo
+                </button>
             </div>
 
             {/* Stats */}
@@ -100,12 +89,11 @@ export function ProcessosSEI({ searchQuery }: ProcessosSEIProps) {
                 <ProcessTable processes={processes} searchQuery={searchQuery} />
             )}
 
-            {showNewModal && (
-                <NewProcessModal onClose={() => setShowNewModal(false)} onSuccess={handleSuccess} />
-            )}
-
             {showDynamicModal && (
-                <DynamicProcessForm onClose={() => setShowDynamicModal(false)} />
+                <DynamicProcessForm
+                    onClose={() => setShowDynamicModal(false)}
+                    onSuccess={handleSuccess}
+                />
             )}
         </div>
     );
